@@ -224,8 +224,34 @@ function tresipuntvideo_get_coursemodule_info($coursemodule) {
     $info = new cached_cm_info();
     $info->name = $tresipuntvideo->name;
     if ($coursemodule->showdescription) {
-        // Convert intro to html. Do not filter cached version, filters run at display time.
-        $info->content = format_module_intro('tresipuntvideo', $tresipuntvideo, $coursemodule->id, false);
+        global $PAGE;
+        $context = context_module::instance( $coursemodule->id );
+
+        $fs = get_file_storage();
+        $files = $fs->get_area_files(
+            $context->id, 'mod_' . $coursemodule->modname,
+            'content', 0,
+            'sortorder DESC, id ASC', false);
+
+        $file = reset($files);
+
+        $moodleurl = moodle_url::make_pluginfile_url(
+            $context->id, 'mod_' . $coursemodule->modname, 'content', $tresipuntvideo->revision,
+            $file->get_filepath(), $file->get_filename());
+
+        $embedoptions = array(
+            core_media_manager::OPTION_TRUSTED => true,
+            core_media_manager::OPTION_BLOCK => true,
+        );
+
+        $mediamanager = core_media_manager::instance($PAGE);
+
+        $content = $mediamanager->embed_url(
+            $moodleurl, $coursemodule->name, 0, 0, $embedoptions
+        );
+        $content .= format_module_intro('tresipuntvideo', $tresipuntvideo, $coursemodule->id, false);
+
+        $info->content = $content;
     }
 
     if ($tresipuntvideo->tobemigrated) {
