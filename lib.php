@@ -246,8 +246,14 @@ function tresipuntvideo_get_coursemodule_info($coursemodule) {
 
         $mediamanager = core_media_manager::instance($PAGE);
 
+        if (isset($coursemodule->name)) {
+            $cmname = $coursemodule->name;
+        } else {
+            $cmname = '';
+        }
+
         $content = $mediamanager->embed_url(
-            $moodleurl, $coursemodule->name, 0, 0, $embedoptions
+            $moodleurl, $cmname, 0, 0, $embedoptions
         );
         $content .= format_module_intro('tresipuntvideo', $tresipuntvideo, $coursemodule->id, false);
 
